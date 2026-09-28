@@ -1,141 +1,161 @@
 package com.example.leaguetrack.service;
 
+import com.example.leaguetrack.config.ScoringConfig;
+import com.example.leaguetrack.dto.MatchResultRequest;
+import com.example.leaguetrack.exception.BusinessRuleException;
+import com.example.leaguetrack.exception.ResourceNotFoundException;
+import com.example.leaguetrack.model.Fixture;
 import com.example.leaguetrack.model.Match;
 import com.example.leaguetrack.model.MatchStatus;
-import com.example.leaguetrack.model.Standing;
-import com.example.leaguetrack.model.Team;
+import com.example.leaguetrack.model.StandingsEntry;
+import com.example.leaguetrack.repository.FixtureRepository;
 import com.example.leaguetrack.repository.MatchRepository;
+import com.example.leaguetrack.repository.StandingsEntryRepository;
 import com.example.leaguetrack.repository.TeamRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class MatchService {
-    private final MatchRepository matchRepository;
-    private final TeamRepository teamRepository;
 
-    public MatchService(MatchRepository matchRepository, TeamRepository teamRepository) {
+    private final MatchRepository matchRepository;
+    private final FixtureRepository fixtureRepository;
+    private final TeamRepository teamRepository;
+    private final StandingsEntryRepository standingsEntryRepository;
+    private final FixtureService fixtureService;
+    private final ScoringConfig scoringConfig;
+    private final NotificationService notificationService;
+
+    public MatchService(MatchRepository matchRepository,
+                        FixtureRepository fixtureRepository,
+                        TeamRepository teamRepository,
+                        StandingsEntryRepository standingsEntryRepository,
+                        FixtureService fixtureService,
+                        ScoringConfig scoringConfig,
+                        NotificationService notificationService) {
         this.matchRepository = matchRepository;
+        this.fixtureRepository = fixtureRepository;
         this.teamRepository = teamRepository;
+        this.standingsEntryRepository = standingsEntryRepository;
+        this.fixtureService = fixtureService;
+        this.scoringConfig = scoringConfig;
+        this.notificationService = notificationService;
     }
 
     public List<Match> getAllMatches() {
         return matchRepository.findAllByOrderByRoundNumberAscIdAsc();
     }
 
+    public Page<Match> getAllMatches(Pageable pageable) {
+        return matchRepository.findAll(pageable);
+    }
+
+    public Match getMatchById(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with id: " + id));
+    }
+
     @Transactional
     public List<Match> generateFixtures() {
-        List<Team> teams = new ArrayList<>(teamRepository.findAll());
+        fixtureService.generateRoundRobinFixtures();
+        return getAllMatches();
+    }
 
-        if (teams.size() < 2) {
-            throw new IllegalArgumentException("Register at least 2 teams before generating fixtures");
+    @Transactional
+    public Match recordResult(Long matchId, MatchResultRequest request) {
+        if (request == null) {
+            throw new BusinessRuleException("Match result payload cannot be null");
         }
-
-        matchRepository.deleteAll();
-
-        if (teams.size() % 2 != 0) {
-            teams.add(null);
-        }
-
-        int totalTeams = teams.size();
-        int rounds = totalTeams - 1;
-        int matchesPerRound = totalTeams / 2;
-        List<Match> fixtures = new ArrayList<>();
-
-        for (int round = 1; round <= rounds; round++) {
-            for (int i = 0; i < matchesPerRound; i++) {
-                Team first = teams.get(i);
-                Team second = teams.get(totalTeams - 1 - i);
-
-                if (first != null && second != null) {
-                    fixtures.add(new Match(first, second, round));
-                }
-            }
-
-            List<Team> rotated = new ArrayList<>();
-            rotated.add(teams.get(0));
-            rotated.add(teams.get(totalTeams - 1));
-
-            for (int i = 1; i < totalTeams - 1; i++) {
-                rotated.add(teams.get(i));
-            }
-
-            teams = rotated;
-        }
-
-        return matchRepository.saveAll(fixtures);
+        return recordResult(matchId, request.getHomeScore(), request.getAwayScore());
     }
 
     @Transactional
     public Match recordResult(Long matchId, Integer homeScore, Integer awayScore) {
         if (homeScore == null || awayScore == null) {
-            throw new IllegalArgumentException("Both scores are required");
+            throw new BusinessRuleException("Both home and away scores must be provided");
         }
 
         if (homeScore < 0 || awayScore < 0) {
-            throw new IllegalArgumentException("Scores cannot be negative");
+            throw new BusinessRuleException("Scores cannot be negative. Provided: home=" + homeScore + ", away=" + awayScore);
         }
 
         Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("Match not found with id: " + matchId));
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found with id: " + matchId));
 
-        if (match.getStatus() == MatchStatus.COMPLETED) {
-            throw new IllegalArgumentException("This match result has already been recorded");
+        int winPts = scoringConfig.getWinPoints();
+        int drawPts = scoringConfig.getDrawPoints();
+        int lossPts = scoringConfig.getLossPoints();
+
+        StandingsEntry homeStanding = standingsEntryRepository.findByTeam_Id(match.getHomeTeam().getId())
+                .orElseGet(() -> standingsEntryRepository.save(new StandingsEntry(match.getHomeTeam())));
+
+        StandingsEntry awayStanding = standingsEntryRepository.findByTeam_Id(match.getAwayTeam().getId())
+                .orElseGet(() -> standingsEntryRepository.save(new StandingsEntry(match.getAwayTeam())));
+
+        // Enforce Business Rule:
+        // "A match result, once recorded, updates standings exactly once (no duplicate counting on edit without adjustment)."
+        if (match.getStatus() == MatchStatus.COMPLETED && match.getHomeScore() != null && match.getAwayScore() != null) {
+            homeStanding.revertResult(match.getHomeScore(), match.getAwayScore(), winPts, drawPts, lossPts);
+            awayStanding.revertResult(match.getAwayScore(), match.getHomeScore(), winPts, drawPts, lossPts);
+            notificationService.notify("MATCH_RESULT_ADJUSTED",
+                    String.format("Previous result (%d-%d) rolled back for match %s vs %s before applying edit",
+                            match.getHomeScore(), match.getAwayScore(),
+                            match.getHomeTeam().getName(), match.getAwayTeam().getName()));
         }
+
+        // Apply new result to both standings
+        homeStanding.applyResult(homeScore, awayScore, winPts, drawPts, lossPts);
+        awayStanding.applyResult(awayScore, homeScore, winPts, drawPts, lossPts);
+
+        standingsEntryRepository.save(homeStanding);
+        standingsEntryRepository.save(awayStanding);
 
         match.setHomeScore(homeScore);
         match.setAwayScore(awayScore);
         match.setStatus(MatchStatus.COMPLETED);
+        match.setCompletedAt(LocalDateTime.now());
 
-        return matchRepository.save(match);
+        Match updatedMatch = matchRepository.save(match);
+
+        notificationService.notify("MATCH_COMPLETED",
+                String.format("Match #%d (Round %d): %s %d - %d %s | Status: COMPLETED",
+                        updatedMatch.getId(),
+                        updatedMatch.getRoundNumber(),
+                        updatedMatch.getHomeTeam().getName(),
+                        homeScore,
+                        awayScore,
+                        updatedMatch.getAwayTeam().getName()));
+
+        return updatedMatch;
     }
 
-    public List<Standing> getStandings() {
-        List<Team> teams = teamRepository.findAll();
-        List<Match> matches = matchRepository.findAll();
-
-        Map<Long, Standing> table = new HashMap<>();
-
-        for (Team team : teams) {
-            table.put(team.getId(), new Standing(team.getId(), team.getName()));
-        }
-
-        for (Match match : matches) {
-            if (match.getStatus() != MatchStatus.COMPLETED) {
-                continue;
-            }
-
-            Standing home = table.get(match.getHomeTeam().getId());
-            Standing away = table.get(match.getAwayTeam().getId());
-
-            if (match.getHomeScore() > match.getAwayScore()) {
-                home.recordWin();
-                away.recordLoss();
-            } else if (match.getHomeScore() < match.getAwayScore()) {
-                home.recordLoss();
-                away.recordWin();
-            } else {
-                home.recordDraw();
-                away.recordDraw();
-            }
-        }
-
-        List<Standing> standings = new ArrayList<>(table.values());
-
-        standings.sort(
-                Comparator.comparingInt(Standing::getPoints).reversed()
-                        .thenComparing(Comparator.comparingInt(Standing::getWins).reversed())
-                        .thenComparing(Standing::getTeamName, String.CASE_INSENSITIVE_ORDER)
-        );
-
-        return standings;
+    public List<StandingsEntry> getStandings() {
+        return standingsEntryRepository.findAllByOrderByPointsDescGoalDifferenceDescGoalsForDescWonDescTeam_NameAsc();
     }
 
     @Transactional
     public void resetTournament() {
         matchRepository.deleteAll();
+        fixtureRepository.deleteAll();
+        standingsEntryRepository.deleteAll();
         teamRepository.deleteAll();
+        notificationService.notify("TOURNAMENT_RESET", "All tournament data (teams, fixtures, matches, standings) has been reset.");
+    }
+
+    @Transactional
+    public void resetMatchesOnly() {
+        matchRepository.deleteAll();
+        fixtureRepository.deleteAll();
+        List<StandingsEntry> entries = standingsEntryRepository.findAll();
+        for (StandingsEntry entry : entries) {
+            entry.reset();
+        }
+        standingsEntryRepository.saveAll(entries);
+        notificationService.notify("MATCHES_RESET", "Matches and fixtures cleared. Teams preserved and standings reset to 0.");
     }
 }

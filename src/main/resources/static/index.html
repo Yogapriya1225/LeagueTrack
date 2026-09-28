@@ -3,72 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeagueTrack - Tournament Fixtures & Standings</title>
+    <meta name="description" content="LeagueTrack - Professional Intramural Sports Tournament Fixture & Standings Dashboard">
+    <title>LeagueTrack | Pro Sports Tournament & Standings Engine</title>
+    <!-- Modern Typography: Outfit & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<header class="topbar">
-    <div>
-        <h1>LeagueTrack</h1>
-        <p>Intramural Sports Tournament Fixtures & Standings</p>
+<body class="sports-theme">
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- App Shell Wrapper (Pro Sidebar + Main Content) -->
+    <div class="app-layout">
+
+        <!-- ==========================================================================
+             LEFT SIDEBAR (Pro Sports UI like La Liga / EA Sports FC)
+             ========================================================================== -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-crest">
+                    <span class="crest-icon">⚽</span>
+                </div>
+                <div class="brand-info">
+                    <h2 class="brand-name">LeagueTrack</h2>
+                    <span class="league-sub">Intramural Pro League</span>
+                </div>
+            </div>
+
+            <!-- User / Commitee Profile Widget (as seen in screenshot) -->
+            <div class="user-profile-badge">
+                <div class="avatar-wrap">
+                    <div class="user-avatar">🏆</div>
+                    <span class="status-dot"></span>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">ScudettoTrack</span>
+                    <span class="user-role"><span class="trophy-count">🏆 32</span> Official Admin</span>
+                </div>
+            </div>
+
+            <!-- Navigation Sections -->
+            <div class="sidebar-nav-wrap">
+                <div class="nav-category-title">
+                    <span>TOURNAMENT LIVE</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <button class="nav-item active" data-tab="tabDashboard" onclick="switchTab('tabDashboard')">
+                        <span class="nav-icon">⚡</span>
+                        <span class="nav-text">Live Dashboard</span>
+                        <span class="nav-badge pulse-badge">LIVE</span>
+                    </button>
+                    <button class="nav-item" data-tab="tabTeams" onclick="switchTab('tabTeams')">
+                        <span class="nav-icon">🛡️</span>
+                        <span class="nav-text">Teams & Roster</span>
+                        <span id="sideTeamCount" class="nav-pill">0</span>
+                    </button>
+                    <button class="nav-item" data-tab="tabFixtures" onclick="switchTab('tabFixtures')">
+                        <span class="nav-icon">📅</span>
+                        <span class="nav-text">Fixtures & Matches</span>
+                        <span id="sideMatchCount" class="nav-pill">0</span>
+                    </button>
+                    <button class="nav-item" data-tab="tabStandings" onclick="switchTab('tabStandings')">
+                        <span class="nav-icon">🏆</span>
+                        <span class="nav-text">Standings Table</span>
+                    </button>
+                </nav>
+
+                <div class="nav-category-title mt-4">
+                    <span>LEAGUE MANAGEMENT</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <button class="nav-item" data-tab="tabSettings" onclick="switchTab('tabSettings')">
+                        <span class="nav-icon">⚖️</span>
+                        <span class="nav-text">Scoring & Rules</span>
+                    </button>
+                    <a href="/swagger-ui/index.html" target="_blank" class="nav-item">
+                        <span class="nav-icon">📖</span>
+                        <span class="nav-text">Swagger API Docs</span>
+                        <span class="nav-pill">v1.0</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick League Reset at Bottom -->
+            <div class="sidebar-footer">
+                <button class="btn-side-reset" onclick="confirmResetTournament()">
+                    <span>🔄</span> Full League Reset
+                </button>
+            </div>
+        </aside>
+
+        <!-- ==========================================================================
+             MAIN CONTENT AREA
+             ========================================================================== -->
+        <div class="main-wrapper">
+
+            <!-- Top Header Bar -->
+            <header class="top-nav-bar">
+                <div class="breadcrumbs">
+                    <span class="breadcrumb-item">LeagueTrack</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-item">Intramural Sports 2026</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span id="currentViewName" class="breadcrumb-active">Live Dashboard</span>
+                </div>
+
+                <div class="top-actions">
+                    <button class="btn btn-flame" onclick="generateFixtures()">
+                        <span class="btn-icon">⚡</span> Auto-Generate Fixtures
+                    </button>
+                    <div class="live-pill">
+                        <span class="live-indicator"></span>
+                        <span>PORT 8081 &bull; MYSQL</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Hero Tournament Showcase Banner (Inspired by FC Barcelona Banner) -->
+            <section class="tournament-showcase-banner">
+                <div class="showcase-glow"></div>
+                <div class="showcase-content">
+                    <div class="club-hero-left">
+                        <div class="club-crest-large">
+                            <span id="heroLeaderCrest">🏆</span>
+                        </div>
+                        <div class="club-titles">
+                            <div class="club-tagline-row">
+                                <span class="flag-icon">🏁</span>
+                                <span id="heroSubtitle" class="hero-subtext">LEADERBOARD TOP TEAM</span>
+                            </div>
+                            <h1 id="heroLeaderName" class="club-main-name">Tournament Kickoff</h1>
+                            <div class="champions-trophies">
+                                <span>🏆</span><span>🏆</span><span>🏆</span><span>🏆</span>
+                                <span class="trophy-label">SECE Intramural Cup</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Highlighted Stat Boxes (As seen in the reference screenshot) -->
+                    <div class="stat-boxes-grid">
+                        <div class="stat-box">
+                            <span class="stat-box-label">TOTAL TEAMS</span>
+                            <div id="statTotalTeams" class="stat-box-value">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">STAR LEADER</span>
+                            <div id="statLeaderPoints" class="stat-box-value">-</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">MATCHES PLAYED</span>
+                            <div id="statMatchRatio" class="stat-box-value">0 / 0</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">CAMPUS STADIUM</span>
+                            <div class="stat-box-value text-accent">Main Arena</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">SCORING RULE</span>
+                            <div id="statScoringPill" class="stat-box-value text-flame">3 / 1 / 0 PTS</div>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-label">GOALS / SCORES</span>
+                            <div id="statTotalGoals" class="stat-box-value">0 Pts</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Views / Tab Panels Container -->
+            <div class="content-body">
+
+                <!-- ==================================================================
+                     VIEW 1: LIVE DASHBOARD (Chart + Shortened Table + Matches)
+                     ================================================================== -->
+                <section id="tabDashboard" class="tab-panel active">
+
+                    <div class="dashboard-split-layout">
+                        <!-- Left Main Column: Points Trend Graph & Form -->
+                        <div class="dash-col-main">
+
+                            <!-- Visual Points Progression / League Trend Card (Matches Screenshot Graph) -->
+                            <div class="pro-card">
+                                <div class="card-head">
+                                    <div class="head-left">
+                                        <h3 class="head-title">Tournament Standings & Form Trajectory</h3>
+                                        <span class="head-sub">Live points accumulation and goal difference distribution</span>
+                                    </div>
+                                    <div class="head-right">
+                                        <button class="btn btn-sm btn-ghost" onclick="recalculateStandings()">
+                                            <span>🔄</span> Recalculate
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Visual Canvas/Chart Representation -->
+                                <div class="chart-container">
+                                    <div class="chart-header-stats">
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-dot dot-flame"></span>
+                                            <span>Current 1st Rank: <strong id="chartTop1">-</strong></span>
+                                        </div>
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-dot dot-cyan"></span>
+                                            <span>Total Goals Scored: <strong id="chartGoals">0</strong></span>
+                                        </div>
+                                        <div class="chart-stat">
+                                            <span class="chart-stat-dot dot-green"></span>
+                                            <span>Matches Completed: <strong id="chartMatchesCount">0</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Stylized SVG Sports Trend Chart -->
+                                    <div class="svg-chart-wrapper">
+                                        <svg id="trendSvg" viewBox="0 0 800 240" preserveAspectRatio="none" class="sports-svg-chart">
+                                            <defs>
+                                                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                    <stop offset="0%" stop-color="#ff5722" stop-opacity="0.5"/>
+                                                    <stop offset="100%" stop-color="#ff5722" stop-opacity="0.0"/>
+                                                </linearGradient>
+                                                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stop-color="#ff9100"/>
+                                                    <stop offset="50%" stop-color="#ff5722"/>
+                                                    <stop offset="100%" stop-color="#f50057"/>
+                                                </linearGradient>
+                                            </defs>
+                                            <!-- Grid lines -->
+                                            <line x1="40" y1="40" x2="780" y2="40" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="90" x2="780" y2="90" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="140" x2="780" y2="140" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="190" x2="780" y2="190" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+
+                                            <!-- Dynamic Polyline / Path -->
+                                            <path id="svgAreaPath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40 L 760,200 L 60,200 Z" fill="url(#chartGradient)"></path>
+                                            <path id="svgLinePath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40" fill="none" stroke="url(#lineGrad)" stroke-width="4" stroke-linecap="round"></path>
+
+                                            <!-- Points / Nodes -->
+                                            <g id="svgNodesGroup">
+                                                <circle cx="60" cy="180" r="5" fill="#ff9100" stroke="#111" stroke-width="2"/>
+                                                <circle cx="180" cy="170" r="5" fill="#ff7a18" stroke="#111" stroke-width="2"/>
+                                                <circle cx="300" cy="120" r="5" fill="#ff5722" stroke="#111" stroke-width="2"/>
+                                                <circle cx="420" cy="150" r="5" fill="#ff5722" stroke="#111" stroke-width="2"/>
+                                                <circle cx="540" cy="80" r="5" fill="#f50057" stroke="#111" stroke-width="2"/>
+                                                <circle cx="660" cy="60" r="5" fill="#f50057" stroke="#111" stroke-width="2"/>
+                                                <circle cx="760" cy="40" r="7" fill="#ffd600" stroke="#111" stroke-width="2"/>
+                                            </g>
+                                        </svg>
+                                        <div class="chart-x-axis">
+                                            <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span><span>R6</span><span>R7 (Finals)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Registered Teams Preview Table (Matching Lower Table in Screenshot) -->
+                            <div class="pro-card mt-4">
+                                <div class="card-head">
+                                    <div class="head-left">
+                                        <h3 class="head-title">Tournament Teams Roster</h3>
+                                        <span class="head-sub">Active registered teams, branch departments, and team captains</span>
+                                    </div>
+                                    <div class="head-right">
+                                        <button class="btn btn-sm btn-flame" onclick="switchTab('tabTeams')">
+                                            + Register Team
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="pro-table">
+                                        <thead>
+                                            <tr>
+                                                <th># ID</th>
+                                                <th>Team Name</th>
+                                                <th>Captain</th>
+                                                <th>Department</th>
+                                                <th>Contact</th>
+                                                <th class="text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dashTeamsTableBody">
+                                            <tr><td colspan="6" class="text-center text-muted">No teams registered yet.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Shortened League Table + Previous & Next Matches (From Screenshot) -->
+                        <div class="dash-col-side">
+
+                            <!-- Shortened League Table (Exactly as in Reference Screenshot!) -->
+                            <div class="pro-card">
+                                <div class="card-head">
+                                    <div class="head-left">
+                                        <h3 class="head-title">Shortened League Table</h3>
+                                        <span class="head-sub">Live standing positions</span>
+                                    </div>
+                                    <button class="btn-text-link" onclick="switchTab('tabStandings')">Full Table →</button>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="short-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Pos</th>
+                                                <th>Team</th>
+                                                <th class="text-center">Games</th>
+                                                <th class="text-center">+/-</th>
+                                                <th class="text-center">Pts</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="shortenedTableBody">
+                                            <tr><td colspan="5" class="text-center text-muted">Loading table...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Match Cards Widget Pair (Previous Match & Next Match from Screenshot) -->
+                            <div class="match-widgets-row">
+                                <!-- Previous Match Widget -->
+                                <div class="pro-card match-widget-box">
+                                    <div class="widget-label">PREVIOUS MATCH</div>
+                                    <div id="prevMatchWidget" class="match-widget-inner">
+                                        <div class="text-muted text-sm text-center py-4">No completed match yet.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Next Match Widget -->
+                                <div class="pro-card match-widget-box">
+                                    <div class="widget-label">NEXT FIXTURE</div>
+                                    <div id="nextMatchWidget" class="match-widget-inner">
+                                        <div class="text-muted text-sm text-center py-4">No upcoming matches.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Event Activity Stream Card -->
+                            <div class="pro-card mt-3">
+                                <div class="card-head">
+                                    <div class="head-left">
+                                        <h4 class="head-title text-sm">Live Tournament Log</h4>
+                                    </div>
+                                    <button class="btn btn-sm btn-ghost" onclick="loadActivities()">Refresh</button>
+                                </div>
+                                <div id="dashActivityStream" class="activity-stream-compact">
+                                    <div class="text-muted text-center text-xs py-3">No activity recorded yet.</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- ==================================================================
+                     VIEW 2: TEAMS & REGISTRATION
+                     ================================================================== -->
+                <section id="tabTeams" class="tab-panel">
+                    <div class="grid-layout-2">
+                        <!-- Registration Form Card -->
+                        <div class="pro-card">
+                            <div class="card-head">
+                                <div class="head-left">
+                                    <span class="badge badge-flame">NEW ENROLLMENT</span>
+                                    <h3 class="head-title">Register Intramural Team</h3>
+                                    <span class="head-sub">Every registration auto-initializes database standings entries</span>
+                                </div>
+                            </div>
+
+                            <form id="teamRegisterForm" onsubmit="handleTeamSubmit(event)" class="sports-form">
+                                <div class="form-group">
+                                    <label for="teamNameInput" class="form-label">Team Name <span class="required">*</span></label>
+                                    <input id="teamNameInput" type="text" class="sports-input" placeholder="e.g., Computer Science CyberHawks" required maxlength="100">
+                                    <span class="input-hint">Must be unique across the tournament</span>
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="form-group">
+                                        <label for="captainInput" class="form-label">Captain Name</label>
+                                        <input id="captainInput" type="text" class="sports-input" placeholder="e.g., Lionel Silva" maxlength="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="departmentInput" class="form-label">Department / Branch</label>
+                                        <input id="departmentInput" type="text" class="sports-input" placeholder="e.g., CSE / IT / ECE" maxlength="100">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="contactInput" class="form-label">Contact / Phone</label>
+                                    <input id="contactInput" type="text" class="sports-input" placeholder="e.g., +91 98765 43210" maxlength="50">
+                                </div>
+
+                                <div class="form-actions mt-3">
+                                    <button id="btnSubmitTeam" type="submit" class="btn btn-flame w-full">
+                                        <span class="btn-icon">➕</span> Register Team & Initialize Standings
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Team Roster Grid -->
+                        <div class="pro-card">
+                            <div class="card-head">
+                                <div class="head-left">
+                                    <span class="badge badge-cyan">OFFICIAL ROSTER</span>
+                                    <h3 class="head-title">Registered Teams Roster</h3>
+                                </div>
+                                <div class="head-right">
+                                    <input id="teamSearchInput" type="text" class="sports-search-input" placeholder="Search teams..." onkeyup="filterTeamsList()">
+                                </div>
+                            </div>
+
+                            <div id="teamsListContainer" class="teams-cards-grid">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================================
+                     VIEW 3: FIXTURES & MATCH CENTER
+                     ================================================================== -->
+                <section id="tabFixtures" class="tab-panel">
+                    <div class="pro-card">
+                        <div class="card-head flex-wrap">
+                            <div class="head-left">
+                                <span class="badge badge-flame">ROUND-ROBIN SCHEDULER</span>
+                                <h3 class="head-title">Tournament Match Fixtures & Live Scoring</h3>
+                                <p class="head-sub">Polygon circle rotation algorithm schedules fair home and away matches across tournament rounds.</p>
+                            </div>
+                            <div class="head-right">
+                                <button class="btn btn-flame" onclick="generateFixtures()">
+                                    <span class="btn-icon">⚡</span> Auto-Generate Schedule
+                                </button>
+                                <button class="btn btn-outline" onclick="confirmResetMatchesOnly()">
+                                    <span class="btn-icon">🧹</span> Clear Matches Only
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Round Filter Pills Bar -->
+                        <div class="filters-toolbar">
+                            <div id="roundFilterPills" class="pills-scroll-group">
+                                <button class="filter-pill active" onclick="filterFixturesByRound('ALL')">All Rounds</button>
+                            </div>
+                            <div class="status-select-wrap">
+                                <select id="matchStatusFilter" class="sports-select" onchange="filterFixturesByStatus(this.value)">
+                                    <option value="ALL">All Statuses</option>
+                                    <option value="SCHEDULED">Scheduled Only</option>
+                                    <option value="COMPLETED">Completed Only</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Matches Container -->
+                        <div id="fixturesListContainer" class="fixtures-container">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================================
+                     VIEW 4: OFFICIAL STANDINGS TABLE
+                     ================================================================== -->
+                <section id="tabStandings" class="tab-panel">
+                    <div class="pro-card">
+                        <div class="card-head flex-wrap">
+                            <div class="head-left">
+                                <span class="badge badge-emerald">OFFICIAL STANDINGS</span>
+                                <h3 class="head-title">Tournament Standings & Points Table</h3>
+                                <p class="head-sub">
+                                    Standings auto-update on match completion. Editing a score rolls back old points without duplicate counting.
+                                </p>
+                            </div>
+                            <div class="head-right">
+                                <div class="scoring-rules-banner">
+                                    <span>⚙️ Rule:</span>
+                                    <strong id="standingsRuleSummary">Win: 3 pts | Draw: 1 pt | Loss: 0 pts</strong>
+                                </div>
+                                <button class="btn btn-flame" onclick="recalculateStandings()">
+                                    <span class="btn-icon">🔄</span> Recalculate Table
+                                </button>
+                                <button class="btn btn-outline" onclick="loadStandings()">
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive mt-3">
+                            <table class="pro-standings-table">
+                                <thead>
+                                    <tr>
+                                        <th class="th-pos">POS</th>
+                                        <th>CLUB / TEAM</th>
+                                        <th>DEPT</th>
+                                        <th class="text-center" title="Played">P</th>
+                                        <th class="text-center th-win" title="Won">W</th>
+                                        <th class="text-center th-draw" title="Drawn">D</th>
+                                        <th class="text-center th-loss" title="Lost">L</th>
+                                        <th class="text-center" title="Goals For">GF</th>
+                                        <th class="text-center" title="Goals Against">GA</th>
+                                        <th class="text-center" title="Goal Difference">GD</th>
+                                        <th class="text-center th-pts" title="Total Points">PTS</th>
+                                        <th class="text-center">RECENT FORM</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fullStandingsBody">
+                                    <tr><td colspan="12" class="text-center text-muted py-5">Loading tournament standings...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================================
+                     VIEW 5: SCORING RULES & SETTINGS
+                     ================================================================== -->
+                <section id="tabSettings" class="tab-panel">
+                    <div class="grid-layout-2">
+                        <!-- Configurable Scoring Rules -->
+                        <div class="pro-card">
+                            <div class="card-head">
+                                <div class="head-left">
+                                    <span class="badge badge-flame">BUSINESS RULE</span>
+                                    <h3 class="head-title">Configurable Points Scoring Rules</h3>
+                                    <p class="head-sub">Change tournament point allocations and instantly recalculate all standings.</p>
+                                </div>
+                            </div>
+
+                            <form id="scoringRulesForm" onsubmit="handleUpdateScoringRules(event)" class="sports-form">
+                                <div class="form-group">
+                                    <label for="winPointsInput" class="form-label">Points for a Win (W)</label>
+                                    <input id="winPointsInput" type="number" class="sports-input" min="0" max="100" value="3" required>
+                                    <span class="input-hint">Standard soccer/league rule is 3 points</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="drawPointsInput" class="form-label">Points for a Draw (D)</label>
+                                    <input id="drawPointsInput" type="number" class="sports-input" min="0" max="100" value="1" required>
+                                    <span class="input-hint">Standard soccer/league rule is 1 point</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="lossPointsInput" class="form-label">Points for a Loss (L)</label>
+                                    <input id="lossPointsInput" type="number" class="sports-input" min="0" max="100" value="0" required>
+                                    <span class="input-hint">Standard soccer/league rule is 0 points</span>
+                                </div>
+
+                                <div class="form-actions mt-3">
+                                    <button type="submit" class="btn btn-flame">
+                                        <span class="btn-icon">💾</span> Save Scoring Rules & Recalculate
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Danger Zone & Database Operations -->
+                        <div class="pro-card card-border-danger">
+                            <div class="card-head">
+                                <div class="head-left">
+                                    <span class="badge badge-danger">ADMIN CONTROLS</span>
+                                    <h3 class="head-title">Tournament Management Actions</h3>
+                                </div>
+                            </div>
+
+                            <div class="danger-operations-list">
+                                <div class="danger-operation-card">
+                                    <div>
+                                        <h4 class="op-title">Reset Fixtures & Matches Only</h4>
+                                        <p class="op-desc">Clears all generated matches and results. Preserves registered teams and resets standings to 0.</p>
+                                    </div>
+                                    <button class="btn btn-outline" onclick="confirmResetMatchesOnly()">
+                                        Reset Matches
+                                    </button>
+                                </div>
+
+                                <div class="danger-operation-card">
+                                    <div>
+                                        <h4 class="op-title text-danger">Complete League Wipe</h4>
+                                        <p class="op-desc">Permanently deletes all registered teams, matches, fixtures, and standing entries from MySQL.</p>
+                                    </div>
+                                    <button class="btn btn-danger" onclick="confirmResetTournament()">
+                                        Wipe Everything
+                                    </button>
+                                </div>
+
+                                <div class="danger-operation-card">
+                                    <div>
+                                        <h4 class="op-title">Swagger OpenAPI Documentation</h4>
+                                        <p class="op-desc">Test all Spring Boot REST endpoints directly with interactive Swagger UI.</p>
+                                    </div>
+                                    <a href="/swagger-ui/index.html" target="_blank" class="btn btn-flame">
+                                        Open Swagger
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Footer -->
+            <footer class="sports-footer">
+                <div class="footer-content">
+                    <p>LeagueTrack &bull; Real-Time Sports Fixture & Standings System &bull; Sri Eshwar College of Engineering</p>
+                    <p class="text-muted text-xs">Spring Boot 3.5 &bull; Java 21 &bull; MySQL &bull; Port 8081 &bull; High Performance Dark Theme</p>
+                </div>
+            </footer>
+        </div>
     </div>
-    <button class="danger" onclick="resetTournament()">Reset Tournament</button>
-</header>
 
-<main class="container">
-    <section class="card">
-        <h2>1. Register Team</h2>
-        <form id="teamForm">
-            <input id="teamName" type="text" placeholder="Team name" required>
-            <input id="captain" type="text" placeholder="Captain name">
-            <button type="submit">Register Team</button>
-        </form>
-        <div id="teamMessage" class="message"></div>
-    </section>
+    <!-- ==========================================================================
+         MODALS (Score Recording & Edit Team)
+         ========================================================================== -->
 
-    <section class="card">
-        <div class="section-head">
-            <h2>2. Registered Teams</h2>
-            <button onclick="loadTeams()">Refresh</button>
+    <!-- Score Recording Modal -->
+    <div id="scoreModal" class="modal-backdrop" style="display: none;">
+        <div class="sports-modal-box">
+            <div class="modal-header">
+                <div>
+                    <span id="modalRoundBadge" class="badge badge-flame">Round 1</span>
+                    <h3 id="modalTitle" class="modal-title">Record Match Result</h3>
+                </div>
+                <button class="modal-close-btn" onclick="closeScoreModal()">&times;</button>
+            </div>
+            <form id="recordScoreForm" onsubmit="submitMatchScore(event)">
+                <input type="hidden" id="modalMatchId">
+                <div class="modal-match-scoreboard">
+                    <div class="modal-team-side">
+                        <div class="modal-team-avatar" id="modalHomeAvatar">H</div>
+                        <span id="modalHomeName" class="modal-team-label">Home Team</span>
+                        <input id="modalHomeScore" type="number" min="0" max="999" class="modal-score-input" placeholder="0" required>
+                    </div>
+                    <div class="modal-vs-box">
+                        <span class="vs-text">VS</span>
+                    </div>
+                    <div class="modal-team-side">
+                        <div class="modal-team-avatar" id="modalAwayAvatar">A</div>
+                        <span id="modalAwayName" class="modal-team-label">Away Team</span>
+                        <input id="modalAwayScore" type="number" min="0" max="999" class="modal-score-input" placeholder="0" required>
+                    </div>
+                </div>
+                <p id="modalEditNote" class="modal-edit-hint" style="display: none;">
+                    ⚠️ Standings Rollback Notice: This match was already completed. Updating will safely rollback previous points from both teams' standings before applying new scores!
+                </p>
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-ghost" onclick="closeScoreModal()">Cancel</button>
+                    <button type="submit" class="btn btn-flame">Save Result & Update Points</button>
+                </div>
+            </form>
         </div>
-        <table>
-            <thead><tr><th>ID</th><th>Team</th><th>Captain</th><th>Action</th></tr></thead>
-            <tbody id="teamsBody"></tbody>
-        </table>
-    </section>
+    </div>
 
-    <section class="card">
-        <div class="section-head">
-            <h2>3. Fixture Management</h2>
-            <button onclick="generateFixtures()">Auto-Generate Fixtures</button>
+    <!-- Edit Team Modal -->
+    <div id="editTeamModal" class="modal-backdrop" style="display: none;">
+        <div class="sports-modal-box">
+            <div class="modal-header">
+                <div>
+                    <span class="badge badge-cyan">TEAM ROSTER</span>
+                    <h3 class="modal-title">Edit Team Details</h3>
+                </div>
+                <button class="modal-close-btn" onclick="closeEditTeamModal()">&times;</button>
+            </div>
+            <form id="editTeamForm" onsubmit="submitEditTeam(event)" class="sports-form">
+                <input type="hidden" id="editTeamId">
+                <div class="form-group">
+                    <label for="editTeamName" class="form-label">Team Name <span class="required">*</span></label>
+                    <input id="editTeamName" type="text" class="sports-input" required>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="editCaptain" class="form-label">Captain Name</label>
+                        <input id="editCaptain" type="text" class="sports-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDepartment" class="form-label">Department</label>
+                        <input id="editDepartment" type="text" class="sports-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editContact" class="form-label">Contact</label>
+                    <input id="editContact" type="text" class="sports-input">
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-ghost" onclick="closeEditTeamModal()">Cancel</button>
+                    <button type="submit" class="btn btn-flame">Update Team</button>
+                </div>
+            </form>
         </div>
-        <p class="hint">Generates a round-robin fixture set from the registered teams.</p>
-        <div id="fixtureMessage" class="message"></div>
-        <table>
-            <thead>
-            <tr>
-                <th>Match</th><th>Round</th><th>Home</th><th>Away</th>
-                <th>Score</th><th>Status</th><th>Action</th>
-            </tr>
-            </thead>
-            <tbody id="matchesBody"></tbody>
-        </table>
-    </section>
+    </div>
 
-    <section class="card">
-        <div class="section-head">
-            <h2>4. Points Table</h2>
-            <button onclick="loadStandings()">Refresh Standings</button>
-        </div>
-        <table>
-            <thead>
-            <tr><th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Points</th></tr>
-            </thead>
-            <tbody id="standingsBody"></tbody>
-        </table>
-    </section>
-</main>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
