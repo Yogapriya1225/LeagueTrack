@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeagueTrack - Tournament Fixtures & Standings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div>
+        <h1>LeagueTrack</h1>
+        <p>Intramural Sports Tournament Fixtures & Standings</p>
+    </div>
+    <button class="danger" onclick="resetTournament()">Reset Tournament</button>
+</header>
+
+<main class="container">
+    <section class="card">
+        <h2>1. Register Team</h2>
+        <form id="teamForm">
+            <input id="teamName" type="text" placeholder="Team name" required>
+            <input id="captain" type="text" placeholder="Captain name">
+            <button type="submit">Register Team</button>
+        </form>
+        <div id="teamMessage" class="message"></div>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <h2>2. Registered Teams</h2>
+            <button onclick="loadTeams()">Refresh</button>
+        </div>
+        <table>
+            <thead><tr><th>ID</th><th>Team</th><th>Captain</th><th>Action</th></tr></thead>
+            <tbody id="teamsBody"></tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <h2>3. Fixture Management</h2>
+            <button onclick="generateFixtures()">Auto-Generate Fixtures</button>
+        </div>
+        <p class="hint">Generates a round-robin fixture set from the registered teams.</p>
+        <div id="fixtureMessage" class="message"></div>
+        <table>
+            <thead>
+            <tr>
+                <th>Match</th><th>Round</th><th>Home</th><th>Away</th>
+                <th>Score</th><th>Status</th><th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="matchesBody"></tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <h2>4. Points Table</h2>
+            <button onclick="loadStandings()">Refresh Standings</button>
+        </div>
+        <table>
+            <thead>
+            <tr><th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Points</th></tr>
+            </thead>
+            <tbody id="standingsBody"></tbody>
+        </table>
+    </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
