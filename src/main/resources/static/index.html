@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -122,270 +122,105 @@
                 </div>
             </header>
 
-            <!-- Hero Tournament Showcase Banner (Inspired by FC Barcelona Banner) -->
-            <section class="tournament-showcase-banner">
-                <div class="showcase-glow"></div>
-                <div class="showcase-content">
-                    <div class="club-hero-left">
-                        <div class="club-crest-large">
-                            <span id="heroLeaderCrest">🏆</span>
-                        </div>
-                        <div class="club-titles">
-                            <div class="club-tagline-row">
-                                <span class="flag-icon">🏁</span>
-                                <span id="heroSubtitle" class="hero-subtext">LEADERBOARD TOP TEAM</span>
-                            </div>
-                            <h1 id="heroLeaderName" class="club-main-name">Tournament Kickoff</h1>
-                            <div class="champions-trophies">
-                                <span>🏆</span><span>🏆</span><span>🏆</span><span>🏆</span>
-                                <span class="trophy-label">SECE Intramural Cup</span>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Anchor-style Greeting Header -->
+            <div class="anchor-greeting">
+                <h1 class="greeting-title">Good morning, Admin &#128075;</h1>
+                <p class="greeting-sub">LeagueTrack &mdash; Real-time intramural sports tournament management &bull; SECE 2026</p>
+            </div>
 
-                    <!-- Highlighted Stat Boxes (As seen in the reference screenshot) -->
-                    <div class="stat-boxes-grid">
-                        <div class="stat-box">
-                            <span class="stat-box-label">TOTAL TEAMS</span>
-                            <div id="statTotalTeams" class="stat-box-value">0</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-box-label">STAR LEADER</span>
-                            <div id="statLeaderPoints" class="stat-box-value">-</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-box-label">MATCHES PLAYED</span>
-                            <div id="statMatchRatio" class="stat-box-value">0 / 0</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-box-label">CAMPUS STADIUM</span>
-                            <div class="stat-box-value text-accent">Main Arena</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-box-label">SCORING RULE</span>
-                            <div id="statScoringPill" class="stat-box-value text-flame">3 / 1 / 0 PTS</div>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-box-label">GOALS / SCORES</span>
-                            <div id="statTotalGoals" class="stat-box-value">0 Pts</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <!-- Hidden elements JS still references -->
+            <span id="heroLeaderCrest" style="display:none"></span>
+            <span id="heroSubtitle" style="display:none"></span>
+            <span id="heroLeaderName" style="display:none"></span>
 
             <!-- Views / Tab Panels Container -->
             <div class="content-body">
 
                 <!-- ==================================================================
-                     VIEW 1: LIVE DASHBOARD (Chart + Shortened Table + Matches)
+                     VIEW 1: LIVE DASHBOARD
                      ================================================================== -->
-                <section id="tabDashboard" class="tab-panel active">
-
-                    <div class="dashboard-split-layout">
-                        <!-- Left Main Column: Points Trend Graph & Form -->
-                        <div class="dash-col-main">
-
-                            <!-- Visual Points Progression / League Trend Card (Matches Screenshot Graph) -->
+<section id="tabDashboard" class="tab-panel active">
+                    <div class="anchor-stats-row">
+                        <div class="anchor-stat-card"><div class="anchor-stat-icon icon-blue">&#128101;</div><div id="statTotalTeams" class="anchor-stat-value">0</div><div class="anchor-stat-label">Teams Registered</div><span class="anchor-stat-link" onclick="switchTab('tabTeams')">&#8593; Register a team</span></div>
+                        <div class="anchor-stat-card"><div class="anchor-stat-icon icon-green">&#9989;</div><div id="statMatchRatio" class="anchor-stat-value">0 / 0</div><div class="anchor-stat-label">Matches Played</div><span class="anchor-stat-link" onclick="switchTab('tabFixtures')">&#8593; View fixtures</span></div>
+                        <div class="anchor-stat-card"><div class="anchor-stat-icon icon-yellow">&#9889;</div><div id="statTotalGoals" class="anchor-stat-value">0</div><div class="anchor-stat-label">Total Goals Scored</div><span class="anchor-stat-link" onclick="switchTab('tabStandings')">&#8593; View standings</span></div>
+                        <div class="anchor-stat-card"><div class="anchor-stat-icon icon-purple">&#127942;</div><div id="statLeaderPoints" class="anchor-stat-value">-</div><div class="anchor-stat-label">League Leader</div><div id="statScoringPill" style="font-size:11px;color:var(--text-muted);margin-top:2px;font-weight:600;">3/1/0 PTS</div></div>
+                    </div>
+                    <div class="anchor-main-grid">
+                        <div style="display:flex;flex-direction:column;gap:18px;">
                             <div class="pro-card">
                                 <div class="card-head">
-                                    <div class="head-left">
-                                        <h3 class="head-title">Tournament Standings & Form Trajectory</h3>
-                                        <span class="head-sub">Live points accumulation and goal difference distribution</span>
-                                    </div>
-                                    <div class="head-right">
-                                        <button class="btn btn-sm btn-ghost" onclick="recalculateStandings()">
-                                            <span>🔄</span> Recalculate
-                                        </button>
+                                    <div class="head-left"><h3 class="head-title">Points Trend &amp; Form</h3><span class="head-sub">Live points accumulation across rounds</span></div>
+                                    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+                                        <div class="chart-header-stats"><div class="chart-stat"><span class="chart-stat-dot dot-flame"></span><span>1st: <strong id="chartTop1">-</strong></span></div><div class="chart-stat"><span class="chart-stat-dot dot-green"></span><span>Goals: <strong id="chartGoals">0</strong></span></div><div class="chart-stat"><span class="chart-stat-dot dot-cyan"></span><span>Played: <strong id="chartMatchesCount">0</strong></span></div></div>
+                                        <button class="btn btn-sm btn-outline" onclick="recalculateStandings()">&#8635; Recalculate</button>
                                     </div>
                                 </div>
-
-                                <!-- Dynamic Visual Canvas/Chart Representation -->
-                                <div class="chart-container">
-                                    <div class="chart-header-stats">
-                                        <div class="chart-stat">
-                                            <span class="chart-stat-dot dot-flame"></span>
-                                            <span>Current 1st Rank: <strong id="chartTop1">-</strong></span>
-                                        </div>
-                                        <div class="chart-stat">
-                                            <span class="chart-stat-dot dot-cyan"></span>
-                                            <span>Total Goals Scored: <strong id="chartGoals">0</strong></span>
-                                        </div>
-                                        <div class="chart-stat">
-                                            <span class="chart-stat-dot dot-green"></span>
-                                            <span>Matches Completed: <strong id="chartMatchesCount">0</strong></span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Stylized SVG Sports Trend Chart -->
-                                    <div class="svg-chart-wrapper">
-                                        <svg id="trendSvg" viewBox="0 0 800 240" preserveAspectRatio="none" class="sports-svg-chart">
-                                            <defs>
-                                                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                    <stop offset="0%" stop-color="#6c5ce7" stop-opacity="0.18"/>
-                                                    <stop offset="100%" stop-color="#6c5ce7" stop-opacity="0.0"/>
-                                                </linearGradient>
-                                                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stop-color="#6c5ce7"/>
-                                                    <stop offset="100%" stop-color="#00b5d8"/>
-                                                </linearGradient>
-                                            </defs>
-                                            <!-- Grid lines -->
-                                            <line x1="40" y1="40" x2="780" y2="40" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="90" x2="780" y2="90" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="140" x2="780" y2="140" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="190" x2="780" y2="190" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
-
-                                            <!-- Dynamic Polyline / Path -->
-                                            <path id="svgAreaPath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40 L 760,200 L 60,200 Z" fill="url(#chartGradient)"></path>
-                                            <path id="svgLinePath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40" fill="none" stroke="url(#lineGrad)" stroke-width="3.5" stroke-linecap="round"></path>
-
-                                            <!-- Points / Nodes -->
-                                            <g id="svgNodesGroup">
-                                                <circle cx="60" cy="180" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="180" cy="170" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="300" cy="120" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="420" cy="150" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="540" cy="80" r="5" fill="#00b5d8" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="660" cy="60" r="5" fill="#00b5d8" stroke="#fff" stroke-width="2"/>
-                                                <circle cx="760" cy="40" r="7" fill="#00b894" stroke="#fff" stroke-width="2"/>
-                                            </g>
-                                        </svg>
-                                        <div class="chart-x-axis">
-                                            <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span><span>R6</span><span>R7 (Finals)</span>
-                                        </div>
-                                    </div>
+                                <div class="svg-chart-wrapper">
+                                    <svg id="trendSvg" viewBox="0 0 800 200" preserveAspectRatio="none" class="sports-svg-chart">
+                                        <defs><linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2563eb" stop-opacity="0.10"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0.0"/></linearGradient></defs>
+                                        <line x1="0" y1="40" x2="800" y2="40" stroke="rgba(0,0,0,0.07)" stroke-dasharray="4"/>
+                                        <line x1="0" y1="90" x2="800" y2="90" stroke="rgba(0,0,0,0.07)" stroke-dasharray="4"/>
+                                        <line x1="0" y1="140" x2="800" y2="140" stroke="rgba(0,0,0,0.07)" stroke-dasharray="4"/>
+                                        <path id="svgAreaPath" d="M 60,160 L 180,150 L 300,100 L 420,130 L 540,65 L 660,45 L 760,25 L 760,180 L 60,180 Z" fill="url(#chartGradient)"></path>
+                                        <path id="svgLinePath" d="M 60,160 L 180,150 L 300,100 L 420,130 L 540,65 L 660,45 L 760,25" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"></path>
+                                        <g id="svgNodesGroup">
+                                            <circle cx="60" cy="160" r="4" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="180" cy="150" r="4" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="300" cy="100" r="4" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="420" cy="130" r="4" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="540" cy="65" r="4" fill="#0891b2" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="660" cy="45" r="4" fill="#0891b2" stroke="#fff" stroke-width="2"/>
+                                            <circle cx="760" cy="25" r="5" fill="#15803d" stroke="#fff" stroke-width="2"/>
+                                        </g>
+                                    </svg>
+                                    <div class="chart-x-axis"><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span><span>R6</span><span>Finals</span></div>
                                 </div>
                             </div>
-
-                            <!-- Dashcom-style 3 stat cards under chart -->
-                            <div class="chart-stats-row">
-                                <div class="chart-stat-card">
-                                    <div class="stat-arrow up">&#8679;</div>
-                                    <div class="stat-card-body">
-                                        <span id="statCard1Val" class="stat-card-value">0</span>
-                                        <span class="stat-card-label">Teams Registered</span>
-                                    </div>
-                                    <span id="statCard1Chg" class="stat-card-change up">Active</span>
-                                </div>
-                                <div class="chart-stat-card">
-                                    <div class="stat-arrow down">&#8681;</div>
-                                    <div class="stat-card-body">
-                                        <span id="statCard2Val" class="stat-card-value">0</span>
-                                        <span class="stat-card-label">Matches Played</span>
-                                    </div>
-                                    <span id="statCard2Chg" class="stat-card-change up">+Live</span>
-                                </div>
-                                <div class="chart-stat-card">
-                                    <div class="stat-arrow info">&#9733;</div>
-                                    <div class="stat-card-body">
-                                        <span id="statCard3Val" class="stat-card-value">0</span>
-                                        <span class="stat-card-label">Total Goals</span>
-                                    </div>
-                                    <span id="statCard3Chg" class="stat-card-change up">Scored</span>
+                            <div class="pro-card">
+                                <div class="card-head"><h3 class="head-title">&#9883; Tournament Toolkit</h3><button class="btn btn-sm btn-flame" onclick="generateFixtures()">&#9889; Auto-Generate</button></div>
+                                <div class="toolkit-cards-grid">
+                                    <div class="toolkit-card" onclick="switchTab('tabFixtures')"><div class="toolkit-card-icon icon-blue">&#128197;</div><div class="toolkit-card-title">Fixtures &amp; Matches</div><div class="toolkit-card-sub">View all rounds &rarr; record scores</div></div>
+                                    <div class="toolkit-card" onclick="switchTab('tabStandings')"><div class="toolkit-card-icon icon-yellow">&#127942;</div><div class="toolkit-card-title">Standings Table</div><div class="toolkit-card-sub">Full league table with GD &amp; form</div></div>
+                                    <div class="toolkit-card" onclick="switchTab('tabTeams')"><div class="toolkit-card-icon icon-green">&#128101;</div><div class="toolkit-card-title">Teams &amp; Roster</div><div class="toolkit-card-sub">Register &amp; manage all teams</div></div>
+                                    <div class="toolkit-card" onclick="switchTab('tabSettings')"><div class="toolkit-card-icon icon-purple">&#9878;</div><div class="toolkit-card-title">Scoring &amp; Rules</div><div class="toolkit-card-sub">Configure Win / Draw / Loss pts</div></div>
                                 </div>
                             </div>
-
-                            <!-- Detailed Registered Teams Preview Table (Matching Lower Table in Screenshot) -->
-                            <div class="pro-card mt-4">
-                                <div class="card-head">
-                                    <div class="head-left">
-                                        <h3 class="head-title">Tournament Teams Roster</h3>
-                                        <span class="head-sub">Active registered teams, branch departments, and team captains</span>
-                                    </div>
-                                    <div class="head-right">
-                                        <button class="btn btn-sm btn-flame" onclick="switchTab('tabTeams')">
-                                            + Register Team
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table class="pro-table">
-                                        <thead>
-                                            <tr>
-                                                <th># ID</th>
-                                                <th>Team Name</th>
-                                                <th>Captain</th>
-                                                <th>Department</th>
-                                                <th>Contact</th>
-                                                <th class="text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="dashTeamsTableBody">
-                                            <tr><td colspan="6" class="text-center text-muted">No teams registered yet.</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="pro-card">
+                                <div class="card-head"><div><h3 class="head-title">Teams Roster</h3><span class="head-sub">Active registered teams and captains</span></div><button class="btn btn-sm btn-flame" onclick="switchTab('tabTeams')">+ Register</button></div>
+                                <div class="table-responsive"><table class="pro-table"><thead><tr><th># ID</th><th>Team Name</th><th>Captain</th><th>Department</th><th>Contact</th><th class="text-right">Action</th></tr></thead><tbody id="dashTeamsTableBody"><tr><td colspan="6" class="text-center text-muted">No teams registered yet.</td></tr></tbody></table></div>
                             </div>
-
                         </div>
-
-                        <!-- Right Column: Shortened League Table + Previous & Next Matches (From Screenshot) -->
-                        <div class="dash-col-side">
-
-                            <!-- Shortened League Table (Exactly as in Reference Screenshot!) -->
-                            <div class="pro-card">
-                                <div class="card-head">
-                                    <div class="head-left">
-                                        <h3 class="head-title">Shortened League Table</h3>
-                                        <span class="head-sub">Live standing positions</span>
-                                    </div>
-                                    <button class="btn-text-link" onclick="switchTab('tabStandings')">Full Table →</button>
-                                </div>
-
-                                <div class="table-responsive">
-                                    <table class="short-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Pos</th>
-                                                <th>Team</th>
-                                                <th class="text-center">Games</th>
-                                                <th class="text-center">+/-</th>
-                                                <th class="text-center">Pts</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="shortenedTableBody">
-                                            <tr><td colspan="5" class="text-center text-muted">Loading table...</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div class="right-panel">
+                            <div class="right-panel-card">
+                                <div class="rp-card-header"><span class="rp-card-title">&#128200; Match Progress</span><button class="rp-menu-btn">&#8943;</button></div>
+                                <div class="target-ring-wrap"><svg class="target-ring-svg" viewBox="0 0 120 120"><circle class="target-ring-bg" cx="60" cy="60" r="48"/><circle id="progressRingFill" class="target-ring-fill" cx="60" cy="60" r="48" stroke-dasharray="0 301.59"/></svg><div class="target-ring-center"><span id="progressRingPct" class="target-ring-pct">0%</span><span class="target-ring-sub">completed</span></div></div>
+                                <div class="target-stat-row"><div><div id="rpMatchesPlayed" class="target-stat-num">0</div><div class="target-stat-label">Played</div></div><div style="text-align:right;"><div id="rpMatchesTotal" class="target-stat-num">0</div><div class="target-stat-label">Total</div></div></div>
+                                <div class="target-legend" style="margin-top:8px;"><span class="legend-dot"></span><span id="rpLeaderName">No leader yet</span></div>
                             </div>
-
-                            <!-- Match Cards Widget Pair (Previous Match & Next Match from Screenshot) -->
-                            <div class="match-widgets-row">
-                                <!-- Previous Match Widget -->
-                                <div class="pro-card match-widget-box">
-                                    <div class="widget-label">PREVIOUS MATCH</div>
-                                    <div id="prevMatchWidget" class="match-widget-inner">
-                                        <div class="text-muted text-sm text-center py-4">No completed match yet.</div>
-                                    </div>
-                                </div>
-
-                                <!-- Next Match Widget -->
-                                <div class="pro-card match-widget-box">
+                            <div class="right-panel-card">
+                                <div class="rp-card-header"><span class="rp-card-title">&#9917; Recent Activity</span><button class="rp-menu-btn" onclick="loadActivities()">&#8635;</button></div>
+                                <div id="dashActivityStream" class="activity-stream-compact"><div class="activity-empty"><div class="activity-empty-icon">&#128640;</div><div class="activity-empty-title">No activity yet</div><div class="activity-empty-sub">Record a match result to get started</div></div></div>
+                            </div>
+                            <div class="right-panel-card">
+                                <div class="rp-card-header"><span class="rp-card-title">&#127944; Top Teams</span><button class="rp-menu-btn" onclick="switchTab('tabStandings')">&#8594;</button></div>
+                                <div id="rpTopTeamsList" class="customer-list"><div class="text-muted text-sm text-center py-4">No standings yet.</div></div>
+                            </div>
+                            <div class="right-panel-card">
+                                <div class="rp-card-header"><span class="rp-card-title">&#127942; Live Standings</span><button class="rp-menu-btn" onclick="switchTab('tabStandings')">&#8594;</button></div>
+                                <table class="short-table"><thead><tr><th>Pos</th><th>Team</th><th class="text-center">P</th><th class="text-center">GD</th><th class="text-center">Pts</th></tr></thead><tbody id="shortenedTableBody"><tr><td colspan="5" class="text-center text-muted">Loading...</td></tr></tbody></table>
+                            </div>
+                            <div class="right-panel-card">
+                                <div class="rp-card-header"><span class="rp-card-title">&#128203; Match Center</span></div>
+                                <div class="widget-label">PREVIOUS MATCH</div>
+                                <div id="prevMatchWidget" class="match-widget-inner"><div class="text-muted text-sm text-center py-3">No completed match yet.</div></div>
+                                <div style="border-top:1.5px solid var(--border);padding-top:12px;margin-top:12px;">
                                     <div class="widget-label">NEXT FIXTURE</div>
-                                    <div id="nextMatchWidget" class="match-widget-inner">
-                                        <div class="text-muted text-sm text-center py-4">No upcoming matches.</div>
-                                    </div>
+                                    <div id="nextMatchWidget" class="match-widget-inner"><div class="text-muted text-sm text-center py-3">No upcoming matches.</div></div>
                                 </div>
                             </div>
-
-                            <!-- Live Event Activity Stream Card -->
-                            <div class="pro-card mt-3">
-                                <div class="card-head">
-                                    <div class="head-left">
-                                        <h4 class="head-title text-sm">Live Tournament Log</h4>
-                                    </div>
-                                    <button class="btn btn-sm btn-ghost" onclick="loadActivities()">Refresh</button>
-                                </div>
-                                <div id="dashActivityStream" class="activity-stream-compact">
-                                    <div class="text-muted text-center text-xs py-3">No activity recorded yet.</div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
-
                 </section>
 
                 <!-- ==================================================================
