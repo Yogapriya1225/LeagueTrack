@@ -221,40 +221,67 @@
                                         <svg id="trendSvg" viewBox="0 0 800 240" preserveAspectRatio="none" class="sports-svg-chart">
                                             <defs>
                                                 <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                    <stop offset="0%" stop-color="#ff5722" stop-opacity="0.5"/>
-                                                    <stop offset="100%" stop-color="#ff5722" stop-opacity="0.0"/>
+                                                    <stop offset="0%" stop-color="#6c5ce7" stop-opacity="0.18"/>
+                                                    <stop offset="100%" stop-color="#6c5ce7" stop-opacity="0.0"/>
                                                 </linearGradient>
                                                 <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stop-color="#ff9100"/>
-                                                    <stop offset="50%" stop-color="#ff5722"/>
-                                                    <stop offset="100%" stop-color="#f50057"/>
+                                                    <stop offset="0%" stop-color="#6c5ce7"/>
+                                                    <stop offset="100%" stop-color="#00b5d8"/>
                                                 </linearGradient>
                                             </defs>
                                             <!-- Grid lines -->
-                                            <line x1="40" y1="40" x2="780" y2="40" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="90" x2="780" y2="90" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="140" x2="780" y2="140" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
-                                            <line x1="40" y1="190" x2="780" y2="190" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="40" x2="780" y2="40" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="90" x2="780" y2="90" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="140" x2="780" y2="140" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
+                                            <line x1="40" y1="190" x2="780" y2="190" stroke="rgba(0,0,0,0.05)" stroke-dasharray="4"/>
 
                                             <!-- Dynamic Polyline / Path -->
                                             <path id="svgAreaPath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40 L 760,200 L 60,200 Z" fill="url(#chartGradient)"></path>
-                                            <path id="svgLinePath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40" fill="none" stroke="url(#lineGrad)" stroke-width="4" stroke-linecap="round"></path>
+                                            <path id="svgLinePath" d="M 60,180 L 180,170 L 300,120 L 420,150 L 540,80 L 660,60 L 760,40" fill="none" stroke="url(#lineGrad)" stroke-width="3.5" stroke-linecap="round"></path>
 
                                             <!-- Points / Nodes -->
                                             <g id="svgNodesGroup">
-                                                <circle cx="60" cy="180" r="5" fill="#ff9100" stroke="#111" stroke-width="2"/>
-                                                <circle cx="180" cy="170" r="5" fill="#ff7a18" stroke="#111" stroke-width="2"/>
-                                                <circle cx="300" cy="120" r="5" fill="#ff5722" stroke="#111" stroke-width="2"/>
-                                                <circle cx="420" cy="150" r="5" fill="#ff5722" stroke="#111" stroke-width="2"/>
-                                                <circle cx="540" cy="80" r="5" fill="#f50057" stroke="#111" stroke-width="2"/>
-                                                <circle cx="660" cy="60" r="5" fill="#f50057" stroke="#111" stroke-width="2"/>
-                                                <circle cx="760" cy="40" r="7" fill="#ffd600" stroke="#111" stroke-width="2"/>
+                                                <circle cx="60" cy="180" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="180" cy="170" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="300" cy="120" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="420" cy="150" r="5" fill="#6c5ce7" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="540" cy="80" r="5" fill="#00b5d8" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="660" cy="60" r="5" fill="#00b5d8" stroke="#fff" stroke-width="2"/>
+                                                <circle cx="760" cy="40" r="7" fill="#00b894" stroke="#fff" stroke-width="2"/>
                                             </g>
                                         </svg>
                                         <div class="chart-x-axis">
                                             <span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span><span>R6</span><span>R7 (Finals)</span>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Dashcom-style 3 stat cards under chart -->
+                            <div class="chart-stats-row">
+                                <div class="chart-stat-card">
+                                    <div class="stat-arrow up">&#8679;</div>
+                                    <div class="stat-card-body">
+                                        <span id="statCard1Val" class="stat-card-value">0</span>
+                                        <span class="stat-card-label">Teams Registered</span>
+                                    </div>
+                                    <span id="statCard1Chg" class="stat-card-change up">Active</span>
+                                </div>
+                                <div class="chart-stat-card">
+                                    <div class="stat-arrow down">&#8681;</div>
+                                    <div class="stat-card-body">
+                                        <span id="statCard2Val" class="stat-card-value">0</span>
+                                        <span class="stat-card-label">Matches Played</span>
+                                    </div>
+                                    <span id="statCard2Chg" class="stat-card-change up">+Live</span>
+                                </div>
+                                <div class="chart-stat-card">
+                                    <div class="stat-arrow info">&#9733;</div>
+                                    <div class="stat-card-body">
+                                        <span id="statCard3Val" class="stat-card-value">0</span>
+                                        <span class="stat-card-label">Total Goals</span>
+                                    </div>
+                                    <span id="statCard3Chg" class="stat-card-change up">Scored</span>
                                 </div>
                             </div>
 
@@ -613,10 +640,82 @@
             <footer class="sports-footer">
                 <div class="footer-content">
                     <p>LeagueTrack &bull; Real-Time Sports Fixture & Standings System &bull; Sri Eshwar College of Engineering</p>
-                    <p class="text-muted text-xs">Spring Boot 3.5 &bull; Java 21 &bull; MySQL &bull; Port 8081 &bull; High Performance Dark Theme</p>
+                    <p class="text-muted text-xs">Spring Boot 3.5 &bull; Java 21 &bull; MySQL &bull; Port 8081 &bull; Professional Light Theme</p>
                 </div>
             </footer>
         </div>
+
+        <!-- ==========================================================================
+             RIGHT PANEL (Dashcom 3rd Column: Donut + Weekly Bar + Top Teams)
+             ========================================================================== -->
+        <aside class="right-panel" id="rightPanel">
+
+            <!-- Tournament Target / Progress Donut Ring -->
+            <div class="right-panel-card">
+                <div class="rp-card-header">
+                    <span class="rp-card-title">Match Progress</span>
+                    <button class="rp-menu-btn">&#8943;</button>
+                </div>
+                <!-- Donut Ring -->
+                <div class="target-ring-wrap">
+                    <svg class="target-ring-svg" viewBox="0 0 120 120">
+                        <circle class="target-ring-bg" cx="60" cy="60" r="48"/>
+                        <circle id="progressRingFill" class="target-ring-fill" cx="60" cy="60" r="48"
+                            stroke-dasharray="0 301.59" style="transition:stroke-dasharray 0.8s ease;"/>
+                    </svg>
+                    <div class="target-ring-center">
+                        <span id="progressRingPct" class="target-ring-pct">0%</span>
+                        <span class="target-ring-sub">completed</span>
+                    </div>
+                </div>
+                <div class="target-stat-row">
+                    <div>
+                        <div id="rpMatchesPlayed" class="target-stat-num">0</div>
+                        <div class="target-stat-label">Played</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div id="rpMatchesTotal" class="target-stat-num">0</div>
+                        <div class="target-stat-label">Total Fixtures</div>
+                    </div>
+                </div>
+                <div class="target-legend" style="margin-top:10px;">
+                    <span class="legend-dot"></span>
+                    <span id="rpLeaderName">No leader yet</span>
+                </div>
+            </div>
+
+            <!-- Weekly / Per-Round Summary Bar Chart -->
+            <div class="right-panel-card">
+                <div class="rp-card-header">
+                    <span class="rp-card-title">Goals Per Round</span>
+                    <button class="rp-menu-btn">&#8943;</button>
+                </div>
+                <div class="weekly-bar-wrap">
+                    <div class="weekly-bar-row" id="goalsBarChart">
+                        <div class="week-bar-col"><div class="week-bar" style="height:20%"></div><span class="week-bar-label">R1</span></div>
+                        <div class="week-bar-col"><div class="week-bar" style="height:30%"></div><span class="week-bar-label">R2</span></div>
+                        <div class="week-bar-col"><div class="week-bar" style="height:50%"></div><span class="week-bar-label">R3</span></div>
+                        <div class="week-bar-col"><div class="week-bar" style="height:40%"></div><span class="week-bar-label">R4</span></div>
+                        <div class="week-bar-col"><div class="week-bar active" style="height:70%"></div><span class="week-bar-label">R5</span></div>
+                        <div class="week-bar-col"><div class="week-bar" style="height:55%"></div><span class="week-bar-label">R6</span></div>
+                        <div class="week-bar-col"><div class="week-bar" style="height:80%"></div><span class="week-bar-label">R7</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Teams (Dashcom "New Customers" style) -->
+            <div class="right-panel-card">
+                <div class="rp-card-header">
+                    <span class="rp-card-title">Top Teams</span>
+                    <button class="rp-menu-btn" onclick="switchTab('tabStandings')">&#8594;</button>
+                </div>
+                <div id="rpTopTeamsList" class="customer-list">
+                    <div class="text-muted text-sm text-center py-4">No standings yet.</div>
+                </div>
+            </div>
+
+        </aside>
+
     </div>
 
     <!-- ==========================================================================

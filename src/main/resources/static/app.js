@@ -128,6 +128,14 @@ function updateDashboardShowcase() {
     document.getElementById("statTotalGoals").textContent = `${totalGoals} Pts`;
     document.getElementById("statScoringPill").textContent = `${state.scoringRule.winPoints} / ${state.scoringRule.drawPoints} / ${state.scoringRule.lossPoints} PTS`;
 
+    // Dashcom stat cards under chart
+    const _sc1 = document.getElementById("statCard1Val");
+    const _sc2 = document.getElementById("statCard2Val");
+    const _sc3 = document.getElementById("statCard3Val");
+    if (_sc1) _sc1.textContent = totalTeams;
+    if (_sc2) _sc2.textContent = completedMatches.length;
+    if (_sc3) _sc3.textContent = totalGoals;
+
     // Sidebar Pills
     document.getElementById("sideTeamCount").textContent = totalTeams;
     document.getElementById("sideMatchCount").textContent = totalMatches;
@@ -161,6 +169,77 @@ function updateDashboardShowcase() {
     renderMatchWidgets();
     renderDashboardTeamsTable();
     updateTrendChartVisuals();
+    updateRightPanel();
+}
+
+/* ==========================================================================
+   Right Panel: Donut Ring + Goals Bar + Top Teams  (Dashcom style)
+   ========================================================================== */
+
+function updateRightPanel() {
+    const completedMatches = state.matches.filter(m => m.status === "COMPLETED");
+    const totalMatches = state.matches.length;
+
+    // --- Donut ring ---
+    const pct = totalMatches > 0 ? Math.round((completedMatches.length / totalMatches) * 100) : 0;
+    const circumference = 2 * Math.PI * 48;
+    const dashVal = (pct / 100) * circumference;
+    const ringFill = document.getElementById("progressRingFill");
+    const ringPct  = document.getElementById("progressRingPct");
+    if (ringFill) ringFill.setAttribute("stroke-dasharray", `${dashVal.toFixed(2)} ${circumference.toFixed(2)}`);
+    if (ringPct)  ringPct.textContent = pct + "%";
+    const rpPlayed = document.getElementById("rpMatchesPlayed");
+    const rpTotal  = document.getElementById("rpMatchesTotal");
+    const rpLeader = document.getElementById("rpLeaderName");
+    if (rpPlayed) rpPlayed.textContent = completedMatches.length;
+    if (rpTotal)  rpTotal.textContent  = totalMatches;
+    if (rpLeader) rpLeader.textContent = (state.standings && state.standings.length > 0)
+        ? state.standings[0].team.name + " leading"
+        : "No leader yet";
+
+    // --- Goals per round bar chart ---
+    const barChart = document.getElementById("goalsBarChart");
+    if (barChart) {
+        const roundGoals = {};
+        state.matches.forEach(m => {
+            if (m.status === "COMPLETED") {
+                const r = m.roundNumber || 1;
+                roundGoals[r] = (roundGoals[r] || 0) + (m.homeScore || 0) + (m.awayScore || 0);
+            }
+        });
+        const rounds = Object.keys(roundGoals).map(Number).sort((a, b) => a - b);
+        if (rounds.length > 0) {
+            const maxG = Math.max(...rounds.map(r => roundGoals[r]), 1);
+            barChart.innerHTML = rounds.slice(0, 7).map(r => {
+                const h = Math.max(8, Math.round((roundGoals[r] / maxG) * 100));
+                return `<div class="week-bar-col"><div class="week-bar" style="height:${h}%"></div><span class="week-bar-label">R${r}</span></div>`;
+            }).join("");
+        }
+    }
+
+    // --- Top teams list (Dashcom "New Customers" card) ---
+    const rpList = document.getElementById("rpTopTeamsList");
+    if (!rpList) return;
+    if (!state.standings || state.standings.length === 0) {
+        rpList.innerHTML = `<div class="text-muted text-sm text-center py-4">No standings yet.</div>`;
+        return;
+    }
+    const AVATAR_COLORS = ["#6c5ce7","#00b5d8","#00b894","#e17055","#fdcb6e"];
+    rpList.innerHTML = state.standings.slice(0, 5).map((entry, idx) => {
+        const initials = entry.team.name.substring(0, 2).toUpperCase();
+        const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+        return `<div class="customer-item">
+            <div class="customer-avatar" style="background:${color};">${initials}</div>
+            <div class="customer-info">
+                <div class="customer-name">${escapeHtml(entry.team.name)}</div>
+                <div class="customer-sub">${entry.points} pts &bull; ${entry.won}W ${entry.drawn}D ${entry.lost}L</div>
+            </div>
+            <div class="customer-actions">
+                <button class="customer-action-btn" title="Table" onclick="switchTab('tabStandings')">&#9776;</button>
+                <button class="customer-action-btn" title="Fixtures" onclick="switchTab('tabFixtures')">&#9654;</button>
+            </div>
+        </div>`;
+    }).join("");
 }
 
 /* ==========================================================================
